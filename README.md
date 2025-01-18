@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Sistema de Criação de Modelos de Produtos com Montagem de Imagens
 
-## Getting Started
+## Descrição Geral
+Este projeto é um sistema web completo para gerenciar recortes de produtos, permitindo que sejam visualizados em camadas e combinados para formar uma única imagem final. O sistema inclui funcionalidades de CRUD para recortes, upload de imagens para armazenamento em nuvem, organização das camadas por ordem de exibição e visualização dinâmica de modelos montados.
 
-First, run the development server:
+## Funcionalidades Principais
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Autenticação e Autorização
+- Login e logout utilizando JWT.
+- Acesso restrito às funcionalidades para usuários autenticados.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. CRUD de Recortes
+- **Criar**: Cadastro de novos recortes com informações detalhadas.
+- **Ler**: Listagem de recortes com paginação.
+- **Atualizar**: Edição de recortes existentes.
+- **Excluir**: Remoção de recortes, incluindo suas imagens associadas na nuvem.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 3. Visualização de Modelos
+- Montagem dinâmica das camadas com base na ordem de exibição.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Upload de Imagens
+- Upload de imagens associadas aos recortes com armazenamento em nuvem.
+- Salvar os links gerados no banco de dados.
 
-## Learn More
+### 5. Filtros e Ordenação (Opcional)
+- Busca de recortes por nome, tipo ou SKU.
+- Ordenação por ordem de exibição ou nome do modelo.
 
-To learn more about Next.js, take a look at the following resources:
+## Tecnologias Utilizadas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Front-End
+- **Framework:** Next.js
+- **Estilização:** TailwindCSS
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Back-End
+- **Framework:** Next.js (Node.js)
+- **Banco de Dados:** PostgreSQL
+- **ORM:** Prisma
+- **Armazenamento de Imagens:** AWS S3
+- **Autenticação:** JWT
