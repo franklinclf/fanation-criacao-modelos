@@ -3,17 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --dark: #070707;
-  --dark-grey: #212121;
-  --dark-purple: #440986;
-  --white: #fff;
-  --light: #fefefe;
-  --light-grey: #f2f2f7;
-  --light-purple: #9a0ff1;
+  font-family: Poppins, sans-serif;
+}
+
+::selection {
+  color: white;
+  background: #9a0ff1;
 }
 
 body {
   color: var(--dark);
   background: var(--dark);
-  font-family: Poppins, sans-serif;
 }

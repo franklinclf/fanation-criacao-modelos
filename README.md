@@ -34,7 +34,7 @@ Este projeto é um sistema web completo para gerenciar recortes de produtos, per
 
 ### Back-End
 - **Framework:** Next.js (Node.js)
-- **Banco de Dados:** PostgreSQL
+- **Banco de Dados:** PostgreSQL (Firebase Data Connect)
 - **ORM:** Prisma
-- **Armazenamento de Imagens:** AWS S3
+- **Armazenamento de Imagens:** Firebase Storage
 - **Autenticação:** JWT

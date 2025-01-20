@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id Int @id @default(autoincrement())
+  username String @unique
+  password String
+  recortes Recorte[]
+  produtos Produto[]
+
+  @@map("usuarios")
+}
+
+model Recorte {
+  SKU String @id
+  nome String
+  ordemExibicao Int
+  tipoId Int
+  tipo TipoRecorte @relation(fields: [tipoId], references: [id])
+  posicaoId Int
+  posicao PosicaoRecorte @relation(fields: [posicaoId], references: [id])
+  tipoProdutoId Int
+  tipoProduto TipoProduto @relation(fields: [tipoProdutoId], references: [id])
+  materialId Int
+  material MaterialRecorte @relation(fields: [materialId], references: [id])
+  corId Int
+  cor CorRecorte  @relation(fields: [corId], references: [id])
+  urlImagem String
+  produtos Produto[]
+  usuarios Usuario[]
+  ativo Boolean @default(true)
+
+  @@map("recortes")
+}
+
+model Produto {
+  id Int @id @default(autoincrement())
+  nome String
+  descricao String?
+  recortes Recorte[]
+  usuarios Usuario[]
+  urlImagem String
+
+  @@map("produtos")
+}
+
+model TipoRecorte {
+  id Int @id @default(autoincrement())
+  tipo String @unique
+  recortes Recorte[]
+
+  @@map("tipos_recorte")
+}
+
+model PosicaoRecorte {
+  id Int @id @default(autoincrement())
+  posicao String @unique
+  recortes Recorte[]
+
+  @@map("posicoes_recorte")
+}
+
+model MaterialRecorte {
+  id Int @id @default(autoincrement())
+  material String @unique
+  recortes Recorte[]
+
+  @@map("materiais_recorte")
+}
+
+model CorRecorte {
+  id Int @id @default(autoincrement())
+  cor String @unique
+  recortes Recorte[]
+
+  @@map("cores_recorte")
+}
+
+model TipoProduto {
+  id Int @id @default(autoincrement())
+  tipo String @unique
+  recortes Recorte[]
+
+  @@map("tipos_produto")
+}
+

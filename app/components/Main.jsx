@@ -1,15 +1,14 @@
-import React from 'react'
+import React from "react";
+import Footer from "./Footer";
+import Header from "./Header";
 
 export default function Main({ children }) {
-
-    const header = (
-        <header>
-
-        </header>
-    )
-
   return (
-    { header }
-  )
-
+    <>
+      <Header />
+      {children}
+    </>
+  );
 }
+
+

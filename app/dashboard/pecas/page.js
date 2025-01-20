@@ -1,6 +1,5 @@
 import React from 'react'
-import Main from '../components/Main';
-import DashboardPage from '../components/DashboardPage';
+import DashboardPage from '../../components/DashboardPage';
 
 
 export default function DashboardHomePage({children}) {

@@ -1,9 +1,9 @@
 "use client";
 import Main from "../components/Main";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
   const [loginState, setLoginState] = useState("");
@@ -12,19 +12,18 @@ export default function LoginPage() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const auth = useAuth();
-  const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const response = await auth.login(loginState, passwordState);
+    const response = await auth.signup(loginState, passwordState);
 
+    console.log(response);
+    
     if (response.success) {
-      router.push("/dashboard");
+      redirect("/login");
     } else {
-      alert(response)
-      
       setError(true);
       setErrorMessage(response.message);
     }
@@ -49,11 +48,11 @@ export default function LoginPage() {
               Bem-vindo ao Fanation
             </div>
             <div className="text-dark-grey">
-              Acesse a sua conta para iniciar
+              Crie uma conta
             </div>
-            <form className="flex w-full flex-col pt-2" onSubmit={handleLogin}>
+            <form className="flex w-full flex-col pt-2" onSubmit={handleSignup}>
               <label htmlFor="userName" className="text-sm text-dark-grey">
-                Inserir usuário
+                Usuário
               </label>
               <input
                 value={loginState}
@@ -69,7 +68,7 @@ export default function LoginPage() {
                 htmlFor="userPassword"
                 className="mt-3 text-sm text-dark-grey"
               >
-                Inserir senha
+                Senha
               </label>
               <input
                 value={passwordState}
@@ -83,7 +82,7 @@ export default function LoginPage() {
 
               <input
                 type="submit"
-                value="Acessar"
+                value="Cadastrar"
                 className="mt-4 cursor-pointer rounded-lg bg-dark p-3 text-sm text-white hover:bg-dark-grey focus:outline-light-purple active:bg-dark-purple"
                 disabled={loading}
               ></input>
