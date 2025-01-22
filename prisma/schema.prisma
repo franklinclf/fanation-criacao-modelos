@@ -19,6 +19,7 @@ model Usuario {
 
 model Recorte {
   SKU String @id
+  createdAt DateTime @default(now())
   nome String
   ordemExibicao Int
   tipoId Int

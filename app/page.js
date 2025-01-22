@@ -7,7 +7,7 @@ export default function HomePage() {
   const router = useRouter();
   return (
     <>
-      <main className="flex h-screen w-full flex-col items-center justify-center bg-dark-purple">
+      <main className="relative flex h-screen w-full flex-col items-center justify-center bg-dark-purple">
         <div className="mx-10 flex flex-col items-center justify-center">
           <Image
             className="w-[476]"
@@ -18,7 +18,10 @@ export default function HomePage() {
             priority={true}
           />
 
-          <a onClick={() => router.push('/login')} className="border-current group relative inline-flex cursor-pointer items-center overflow-hidden rounded-lg border px-8 py-3 text-white hover:bg-light-purple active:bg-light-purple active:text-dark-purple">
+          <a
+            onClick={() => router.push("/login")}
+            className="border-current group relative inline-flex cursor-pointer items-center overflow-hidden rounded-lg border px-8 py-3 text-white hover:bg-light-purple active:bg-light-purple active:text-dark-purple"
+          >
             <span className="absolute -end-full transition-all group-hover:end-4">
               <svg
                 className="size-5 rtl:rotate-180"
@@ -41,8 +44,10 @@ export default function HomePage() {
             </span>
           </a>
         </div>
+        <div className="absolute bottom-4">
+          <Footer opacity={25} />
+        </div>
       </main>
-      <Footer opacity="20" />
     </>
   );
 }

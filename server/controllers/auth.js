@@ -4,6 +4,7 @@ import { comparePassword } from '../utils/bcrypt';
 import { findUserByUsername } from './users';
 import { serialize } from 'cookie';
 import cookie from 'cookie';
+import { getRecorteSpecs } from './recortes';
 
 export async function login(username, password, res) {
     if(!username || !password) {
@@ -25,7 +26,6 @@ export async function login(username, password, res) {
     const token = await generateToken({ username: user.username });
 
     res.setHeader('Set-Cookie', serialize('token', token, {
-        secure: true,
         sameSite: 'strict',
         maxAge: 60 * 60 * 24,
         path: '/'
@@ -36,8 +36,6 @@ export async function login(username, password, res) {
 
 export async function logout(res) {
     return res.setHeader('Set-Cookie', serialize('token', '', {
-        httpOnly: true,
-        secure: true,
         expires: new Date(0),
         sameSite: 'strict',
         path: '/'
@@ -60,5 +58,7 @@ export async function verify(req, res) {
     
     const user = await findUserByUsername(username);
 
-    return res.status(200).json({ success: true, user: { username: user.username } });
+    const specs = await getRecorteSpecs();    
+
+    return res.status(200).json({ success: true, user: { username: user.username }, specs });
 }

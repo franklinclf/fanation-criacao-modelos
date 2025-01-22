@@ -24,6 +24,7 @@ export default {
       'light-purple': '#9a0ff1',
       'grey': '#d1d1d6',
       'red': '#ff3b30',
+      'disabled': '#8e8e93'
     }
   },
   plugins: [],

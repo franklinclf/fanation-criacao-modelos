@@ -25,7 +25,6 @@ export default function AuthProvider({ children }) {
     })
     .catch((error) => {
       data = error.response.data;
-      console.log(error);
     })
     .finally(() => {
       setLoading(false);
@@ -41,8 +40,6 @@ export default function AuthProvider({ children }) {
 
     await axios.post("/api/auth/signup", { username, password })
     .then((response) => {
-      console.log(response);
-      
       data = response.data;
     })
     .catch((error) => { 
@@ -84,7 +81,10 @@ export default function AuthProvider({ children }) {
     .then((response) => {
       data = response.data;
       if(data.success) {
+        console.log(data);
+                
         setUser(data.user);
+        setUserData(data.specs);
         setIsAuthenticated(true);
       }
     })
@@ -107,6 +107,7 @@ export default function AuthProvider({ children }) {
     signup,
     logout,
     user,
+    userData,
     isAuthenticated,
     loading,
   };
