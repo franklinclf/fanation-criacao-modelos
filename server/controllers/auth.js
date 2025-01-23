@@ -1,64 +1,87 @@
-'use server'
-import { generateToken, verifyToken } from '../utils/jwt';
-import { comparePassword } from '../utils/bcrypt';
-import { findUserByUsername } from './users';
-import { serialize } from 'cookie';
-import cookie from 'cookie';
-import { getRecorteSpecs } from './recortes';
+"use server";
+import { generateToken, verifyToken } from "../utils/jwt";
+import { comparePassword } from "../utils/bcrypt";
+import { findUserByUsername } from "./users";
+import { serialize } from "cookie";
+import cookie from "cookie";
+import { getRecortesByUser, getRecorteSpecs } from "./recortes";
 
 export async function login(username, password, res) {
-    if(!username || !password) {
-        return res.status(400).json({ success: false, message: 'Preencha todos os campos.' });
-    }
-    
-    const user = await findUserByUsername(username);
+	if (!username || !password) {
+		return res
+			.status(400)
+			.json({ success: false, message: "Preencha todos os campos." });
+	}
 
-    if(!user) {
-        return res.status(400).json({ success: false, message: 'Usuário não encontrado.' });
-    }
+	const user = await findUserByUsername(username);
 
-    const passwordMatch = await comparePassword(password, user.password);
+	if (!user) {
+		return res
+			.status(400)
+			.json({ success: false, message: "Usuário não encontrado." });
+	}
 
-    if(!passwordMatch) {
-        return res.status(400).json({ success: false, message: 'Senha incorreta.' });
-    }
+	const passwordMatch = await comparePassword(password, user.password);
 
-    const token = await generateToken({ username: user.username });
+	if (!passwordMatch) {
+		return res
+			.status(400)
+			.json({ success: false, message: "Senha incorreta." });
+	}
 
-    res.setHeader('Set-Cookie', serialize('token', token, {
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24,
-        path: '/'
-    }));
+	const token = await generateToken({ username: user.username });
 
-    return res.status(200).json({ success: true, user: { username: user.username }});
+	res.setHeader(
+		"Set-Cookie",
+		serialize("token", token, {
+			sameSite: "strict",
+			maxAge: 60 * 60 * 24,
+			path: "/",
+		}),
+	);
+
+	return res
+		.status(200)
+		.json({ success: true, user: { username: user.username } });
 }
 
 export async function logout(res) {
-    return res.setHeader('Set-Cookie', serialize('token', '', {
-        expires: new Date(0),
-        sameSite: 'strict',
-        path: '/'
-      })).json({ success: true });
+	return res
+		.setHeader(
+			"Set-Cookie",
+			serialize("token", "", {
+				expires: new Date(0),
+				sameSite: "strict",
+				path: "/",
+			}),
+		)
+		.json({ success: true });
 }
 
 export async function verify(req, res) {
-    const token = req.cookies.token
+	const token = req.cookies.token;
 
-    if(!token) {
-        return res.status(401).json({ success: false, message: 'Não autenticado.' });
-    }
+	if (!token) {
+		return res
+			.status(401)
+			.json({ success: false, message: "Não autenticado." });
+	}
 
-    const {username} = await verifyToken(token);
-    
+	const { username } = await verifyToken(token);
 
-    if(!username) {
-        return res.status(401).json({ success: false, message: 'Não autenticado.' });
-    }
-    
-    const user = await findUserByUsername(username);
+	if (!username) {
+		return res
+			.status(401)
+			.json({ success: false, message: "Não autenticado." });
+	}
 
-    const specs = await getRecorteSpecs();    
+	const user = await findUserByUsername(username);
 
-    return res.status(200).json({ success: true, user: { username: user.username }, specs });
+	const specs = await getRecorteSpecs();
+
+	const recortes = await getRecortesByUser(username);
+	
+	return res
+		.status(200)
+		.json({ success: true, user: { username: user.username }, specs, recortes });
 }

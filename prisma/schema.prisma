@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:IAmaChampion8151-@localhost:3306/fanation"
 }
 
 model Usuario {
@@ -18,10 +18,15 @@ model Usuario {
 }
 
 model Recorte {
-  SKU String @id
+  id Int @id @default(autoincrement())
+  SKU String @unique
+  chave String @unique
+  usuarioId Int
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
   createdAt DateTime @default(now())
   nome String
-  ordemExibicao Int
+  ordemExibicaoId Int
+  ordemExibicao OrdemExibicao @relation(fields: [ordemExibicaoId], references: [id])
   tipoId Int
   tipo TipoRecorte @relation(fields: [tipoId], references: [id])
   posicaoId Int
@@ -34,7 +39,6 @@ model Recorte {
   cor CorRecorte  @relation(fields: [corId], references: [id])
   urlImagem String
   produtos Produto[]
-  usuarios Usuario[]
   ativo Boolean @default(true)
 
   @@map("recortes")
@@ -43,9 +47,10 @@ model Recorte {
 model Produto {
   id Int @id @default(autoincrement())
   nome String
+  usuarioId Int
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
   descricao String?
   recortes Recorte[]
-  usuarios Usuario[]
   urlImagem String
 
   @@map("produtos")
@@ -53,7 +58,7 @@ model Produto {
 
 model TipoRecorte {
   id Int @id @default(autoincrement())
-  tipo String @unique
+  value String @unique
   recortes Recorte[]
 
   @@map("tipos_recorte")
@@ -61,15 +66,23 @@ model TipoRecorte {
 
 model PosicaoRecorte {
   id Int @id @default(autoincrement())
-  posicao String @unique
+  value String @unique
   recortes Recorte[]
 
   @@map("posicoes_recorte")
 }
 
+model OrdemExibicao {
+  id Int @id @default(autoincrement())
+  value Int @unique
+  recortes Recorte[]
+
+  @@map("ordens_exibicao")
+}
+
 model MaterialRecorte {
   id Int @id @default(autoincrement())
-  material String @unique
+  value String @unique
   recortes Recorte[]
 
   @@map("materiais_recorte")
@@ -77,7 +90,7 @@ model MaterialRecorte {
 
 model CorRecorte {
   id Int @id @default(autoincrement())
-  cor String @unique
+  value String @unique
   recortes Recorte[]
 
   @@map("cores_recorte")
@@ -85,7 +98,7 @@ model CorRecorte {
 
 model TipoProduto {
   id Int @id @default(autoincrement())
-  tipo String @unique
+  value String @unique
   recortes Recorte[]
 
   @@map("tipos_produto")
