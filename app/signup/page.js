@@ -37,13 +37,13 @@ export default function LoginPage() {
 			<Header />
 			<div className="flex h-screen w-full justify-center bg-light sm:h-[calc(100vh-4rem)]">
 				<div className="mt-36 flex w-5/6 flex-col items-center gap-1 sm:w-1/2 md:w-1/3 xl:w-1/4">
-					<Image
+					<img
 						className="h-auto w-[152]"
 						src="/fanation-full-logo-mixed.svg"
 						alt="Logo da Fanation"
-						width={0}
-						height={0}
-						priority={true}
+						
+						
+						
 					/>
 					<div className="pt-2 text-2xl font-bold text-light-purple sm:text-xl sm:font-normal">
 						Bem-vindo ao Fanation

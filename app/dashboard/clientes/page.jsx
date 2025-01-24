@@ -11,13 +11,13 @@ export default function DashboardClientesPage() {
 					Dê vida às suas ideias com o{" "}
 					<span className="text-light-purple">Fanation</span>!
 				</p>
-				<Image
+				<img
 					className="w-5/6 md:w-2/5"
 					src="/design-team.svg"
 					alt="Design Team"
-					width={0}
-					height={0}
-					priority={true}
+					
+					
+					
 				/>
 				<p className="w-2/3 md:w-1/2 text-center">
 					Use o menu lateral para acessar as funcionalidades da

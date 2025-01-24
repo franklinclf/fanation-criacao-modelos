@@ -291,11 +291,11 @@ export default function DashboardPecasPage({ params }) {
 											</div>
 										)}
 									</div>
-									<Image
+									<img
 										className="w-[20]"
 										src="/sort.svg"
-										width={0}
-										height={0}
+										
+										
 										alt=""
 									/>
 								</div>

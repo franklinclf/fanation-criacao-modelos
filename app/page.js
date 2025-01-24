@@ -9,13 +9,13 @@ export default function HomePage() {
 		<>
 			<main className="relative flex h-screen w-full flex-col items-center justify-center bg-dark-purple">
 				<div className="mx-10 flex flex-col items-center justify-center">
-					<Image
+					<img
 						className="w-[476]"
 						src="/fanation-full-logo.svg"
 						alt="Logo da Fanation"
-						width={0}
-						height={0}
-						priority={true}
+						
+						
+						
 					/>
 
 					<a

@@ -380,11 +380,11 @@ export default function RecorteForm({ defaultData }) {
 					<div className="flex w-full flex-col items-start justify-start gap-3 lg:flex-row">
 						{imagemState && (
 							<div className="relative w-full md:w-72">
-								<Image
+								<img
 									className="w-full rounded-lg border border-grey object-cover"
 									src={URL.createObjectURL(imagemState)}
-									width={0}
-									height={0}
+									
+									
 									alt="Imagem"
 								/>
 								<div
@@ -408,11 +408,11 @@ export default function RecorteForm({ defaultData }) {
 								className={`${draggingOver ? 'bg-grey border-dark-grey ' : '' }bg-gray-50 group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-grey px-10 text-center hover:bg-light-grey group-hover:border-dark-grey`}
 							>
 								<div className="group flex flex-col items-center justify-center pb-6 pt-5 group-hover:text-dark-grey">
-									<Image
+									<img
 										className="m-3 w-[30]"
 										src="/upload.svg"
-										width={0}
-										height={0}
+										
+										
 										alt="Upload"
 									/>
 									<p className="group mb-2 text-sm font-semibold text-disabled group-hover:text-dark-grey">
