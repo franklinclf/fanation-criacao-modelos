@@ -1,7 +1,7 @@
 "use client";
 import { use, useEffect, useState } from "react";
-import DashboardPage from "@/app/Components/DashboardPage";
-import Footer from "@/app/Components/Footer";
+import DashboardPage from "@/app/components/DashboardPage";
+import Footer from "@/app/components/Footer";
 import Image from "next/image";
 import axios from "axios";
 import { useAuth } from "@/app/context/AuthContext";
@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { MdInfoOutline } from "react-icons/md";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import OverlappedImages from "@/app/Components/OverlappedImages";
+import OverlappedImages from "@/app/components/OverlappedImages";
 import { redirect } from "next/navigation";
 
 export default function DashboardPreviewPage({ params }) {

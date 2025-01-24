@@ -1,10 +1,10 @@
 "use client";
-import Header from "../Components/Header";
+import Header from "../components/Header";
 import Image from "next/image";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { redirect } from "next/navigation";
-import Footer from "../Components/Footer";
+import Footer from "../components/Footer";
 
 export default function LoginPage() {
 	const [loginState, setLoginState] = useState("");
