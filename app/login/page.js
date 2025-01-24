@@ -3,8 +3,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { redirect } from "next/navigation";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
 
 export default function LoginPage() {
 	const [loginState, setLoginState] = useState("");

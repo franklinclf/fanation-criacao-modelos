@@ -1,7 +1,7 @@
 import React from "react";
-import DashboardPage from "../components/DashboardPage";
+import DashboardPage from "../Components/DashboardPage";
 import Image from "next/image";
-import Footer from "../components/Footer";
+import Footer from "../Components/Footer";
 
 export default function DashboardHomePage() {
 	return (

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import DashboardPage from "../../../components/DashboardPage";
+import DashboardPage from "../../../Components/DashboardPage";
 import { use, useEffect, useMemo, useState } from "react";
 import { TiPlus } from "react-icons/ti";
 import axios from "axios";

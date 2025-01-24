@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import Footer from "./components/Footer";
+import Footer from "./Components/Footer";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {

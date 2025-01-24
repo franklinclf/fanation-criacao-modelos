@@ -1,6 +1,6 @@
 "use client";
-import DashboardPage from "@/app/components/DashboardPage";
-import RecorteForm from "@/app/components/RecorteForm";
+import DashboardPage from "@/app/Components/DashboardPage";
+import RecorteForm from "@/app/Components/RecorteForm";
 
 export default function AdicionarRecortePage() {
 	const defaultData = {
