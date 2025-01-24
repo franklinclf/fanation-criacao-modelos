@@ -20,7 +20,7 @@ export default function DashboardHomePage() {
 					priority={true}
 				/>
 				<p className="w-2/3 md:w-1/2 text-center">
-					Use o menu lateral para acessas as funcionalidades da
+					Use o menu lateral para acessar as funcionalidades da
 					dashboard de criação de modelos.
 				</p>
 			</div>

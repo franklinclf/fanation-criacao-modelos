@@ -6,144 +6,88 @@ import { TiPlus } from "react-icons/ti";
 import axios from "axios";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, redirect } from "next/navigation";
-import { set } from "react-hook-form";
-import { FaSortDown, FaSortUp } from "react-icons/fa";
 
-export default function DashboardPecasPage({ params }) {
-	const [filtroAtivo, setFiltroAtivo] = useState("Todos");
-	const [numTodos, setNumTodos] = useState(0);
-	const [numAtivos, setNumAtivos] = useState(0);
-	const [numExpirado, setNumExpirado] = useState(0);
-	const [pesquisaTextual, setPesquisaTextual] = useState("");
-	const [recortesSelecionados, setRecortesSelecionados] = useState([]);
-	const { user, userData, fetchData } = useAuth();
-	const { page } = use(params);
-	const [filteredRecortes, setFilteredRecortes] = useState([]);
-	const [totalPages, setTotalPages] = useState(0);
+export default function DashboardVisualizacaoPage({ params }) {
 	const router = useRouter();
+	const { fetchData } = useAuth();
+	const { user, userData } = useAuth();
+	const { page } = use(params);
+	const [errorMessage, setErrorMessage] = useState("");
+	const [totalPages, setTotalPages] = useState(0);
+	const [numTodos, setNumTodos] = useState(0);
+	const [filtroAtivo, setFiltroAtivo] = useState("Todos");
+	const [filteredProdutos, setFilteredProdutos] = useState([]);
+	const [pesquisaTextual, setPesquisaTextual] = useState("");
+	const [showFilterOptions, setShowFilterOptions] = useState(false);
 	const [sortByTitulo, setSortByTitulo] = useState({
 		sort: true,
 		ascending: true,
 	});
-	const [sortByOrdem, setSortByOrdem] = useState({
+	const [sortByTipo, setSortByTipo] = useState({
 		sort: false,
 		ascending: true,
 	});
-	const [showFilterOptions, setShowFilterOptions] = useState(false);
-	const [errorMessage, setErrorMessage] = useState("");
-
-	function handleGenerateImage() {
-		const ids = recortesSelecionados.join("/");
-		router.push(`/dashboard/visualizacao/preview/${ids}`);
-	}
 
 	function handleSorting(type) {
 		if (type === "titulo") {
 			setSortByTitulo({ sort: true, ascending: !sortByTitulo.ascending });
-			setSortByOrdem({ sort: false, ascending: true });
+			setSortByTipo({ sort: false, ascending: true });
 		} else if (type === "ordem") {
-			setSortByOrdem({ sort: true, ascending: !sortByOrdem.ascending });
+			setSortByTipo({ sort: true, ascending: !sortByTipo.ascending });
 			setSortByTitulo({ sort: false, ascending: true });
 		}
 	}
 
-	function handleRecorteSelection(recorte) {
-		setErrorMessage("");
-
-		if (recortesSelecionados.includes(recorte.id)) {
-			setRecortesSelecionados(
-				recortesSelecionados.filter((id) => id !== recorte.id),
-			);
-		} else {
-			if (recortesSelecionados.length === 4) {
-				setErrorMessage("Selecione no máximo 4 recortes.");
-				return;
-			}
-			setRecortesSelecionados([...recortesSelecionados, recorte.id]);
-		}
-	}
-
-	async function handleDelete(recorte) {
-		if (!confirm("Tem certeza que deseja excluir este recorte?")) {
+	async function handleDelete(produto) {
+		if (!confirm("Tem certeza que deseja excluir este produto?")) {
 			return;
 		}
 
 		await axios
-			.delete(`/api/recortes/${recorte}`)
-			.then((response) => {
-				let data = response.data;
-				if (data.success) {
+			.delete(`/api/produtos/${produto}`)
+			.then((res) => {
+				console.log(res.data);
+
+				if (res.data.success) {
 					fetchData();
+				} else {
+					setErrorMessage("Erro ao excluir produto.");
 				}
 			})
-			.catch((error) => {
-				console.error(error);
-				setErrorMessage("Erro ao excluir recorte.");
+			.catch((err) => {
+				console.log(err);
+				setErrorMessage("Erro ao excluir produto.");
 			});
 	}
 
-	useMemo(() => {
-		if (userData && userData.recortes) {
-			const totalRecortes = userData.recortes.length;
-			setNumTodos(totalRecortes);
-			totalRecortes == 0
-				? setTotalPages(1)
-				: setTotalPages(Math.ceil(totalRecortes / 10));
-
-			const ativos = userData.recortes.filter(
-				(recorte) => recorte.ativo === true,
-			).length;
-
-			const expirados = userData.recortes.filter(
-				(recorte) => recorte.ativo === false,
-			).length;
-
-			setNumAtivos(ativos);
-			setNumExpirado(expirados);
-		}
-	}, [user, userData]);
-
 	useEffect(() => {
-		if (userData && userData.recortes) {
-			if (!parseInt(page)) redirect("/dashboard/pecas/1");
-			if (page < 0) redirect("/dashboard/pecas/1");
-			if (page > totalPages) redirect(`/dashboard/pecas/${totalPages}`);
+		if (userData && userData.produtos) {
+			if (!parseInt(page)) redirect("/dashboard/visualizacao/1");
+			if (page < 0) redirect("/dashboard/visualizacao/1");
 
-			let recortes = [...userData.recortes];
+			let produtos = [...userData.produtos];
 
-			if (filtroAtivo !== "Todos") {
-				if (filtroAtivo === "Ativos") {
-					recortes = recortes.filter(
-						(recorte) => recorte.ativo === true,
-					);
-				} else if (filtroAtivo === "Expirado") {
-					recortes = recortes.filter(
-						(recorte) => recorte.ativo === false,
-					);
-				}
+			if (produtos.length === 0) {
+				setErrorMessage("Nenhum produto encontrado.");
 			}
+
+			setNumTodos(produtos.length);
 
 			if (pesquisaTextual) {
 				const pesquisaTextualPlain = pesquisaTextual.toLowerCase();
-				recortes = recortes.filter(
+				produtos = produtos.filter(
 					(recorte) =>
 						recorte.nome
 							.toLowerCase()
 							.includes(pesquisaTextualPlain) ||
-						recorte.SKU.toLowerCase().includes(
-							pesquisaTextualPlain,
-						) ||
-						recorte.tipoProduto.value
-							.toLowerCase()
-							.includes(pesquisaTextualPlain) ||
-						recorte.tipo.value
+						recorte.descricao
 							.toLowerCase()
 							.includes(pesquisaTextualPlain),
 				);
 			}
 
 			if (sortByTitulo.sort) {
-				recortes = recortes.sort((a, b) => {
+				produtos = produtos.sort((a, b) => {
 					if (sortByTitulo.ascending) {
 						return a.nome.localeCompare(b.nome);
 					} else {
@@ -152,29 +96,19 @@ export default function DashboardPecasPage({ params }) {
 				});
 			}
 
-			if (sortByOrdem.sort) {
-				recortes = recortes.sort((a, b) => {
-					if (sortByOrdem.ascending) {
-						return a.ordemExibicao.value - b.ordemExibicao.value;
-					} else {
-						return b.ordemExibicao.value - a.ordemExibicao.value;
-					}
-				});
-			}
-
 			if (page) {
-				recortes = recortes.slice((page - 1) * 10, page * 10);
+				produtos = produtos.slice((page - 1) * 10, page * 10);
 			}
 
-			setFilteredRecortes(recortes);
+			setFilteredProdutos(produtos);
 		}
 	}, [
 		userData,
-		filtroAtivo,
 		pesquisaTextual,
+		filtroAtivo,
+		showFilterOptions,
 		page,
 		sortByTitulo,
-		sortByOrdem,
 	]);
 
 	return (
@@ -182,17 +116,17 @@ export default function DashboardPecasPage({ params }) {
 			<div className="flex w-full flex-col items-center justify-end overflow-y-auto px-2 sm:px-10 py-7 align-middle">
 				<div className="mb-5 flex w-full items-center gap-3 flex-row justify-between">
 					<p className="text-2xl text-dark">
-						Peças gerais{" "}
+						Produtos{" "}
 						<span className="text-red text-sm">
 							{errorMessage.length > 0 && errorMessage}
 						</span>
 					</p>
 					<button
-						onClick={() => redirect("/dashboard/pecas/adicionar")}
+						onClick={() => router.push("/dashboard/pecas")}
 						className="rounded-lg bg-dark px-4 py-3 text-sm text-white hover:opacity-85"
 					>
 						<span className="hidden md:inline-block">
-							Adicionar Peça
+							Adicionar Produto
 						</span>
 						<span className="inline-block md:hidden">
 							<TiPlus />
@@ -208,29 +142,9 @@ export default function DashboardPecasPage({ params }) {
 							>
 								Todos ({numTodos})
 							</button>
-							<button
-								onClick={() => setFiltroAtivo("Ativos")}
-								className={`${filtroAtivo == "Ativos" ? "bg-dark text-white" : "text-disabled"} rounded-[10] px-3 py-2 text-sm hover:bg-dark hover:text-white`}
-							>
-								Ativos ({numAtivos})
-							</button>
-							<button
-								onClick={() => setFiltroAtivo("Expirado")}
-								className={`${filtroAtivo == "Expirado" ? "bg-dark text-white" : "text-disabled"} rounded-[10] px-3 py-2 text-sm hover:bg-dark hover:text-white`}
-							>
-								Expirado ({numExpirado})
-							</button>
 						</div>
 
 						<div className="flex items-center gap-5">
-							{recortesSelecionados.length > 0 && (
-								<button
-									onClick={() => handleGenerateImage()}
-									className="rounded-lg px-4 py-3 text-xs sm:text-sm text-dark border border-dark hover:bg-dark hover:text-white hover:opacity-85"
-								>
-									Gerar Imagem
-								</button>
-							)}
 							<div className="flex items-center gap-5">
 								<div className="relative">
 									<input
@@ -280,13 +194,7 @@ export default function DashboardPecasPage({ params }) {
 													Título
 												</div>
 												<div className="hover:bg-light-grey rounded-lg py-2 ps-3">
-													Ordem
-												</div>
-												<div className="hover:bg-light-grey rounded-lg py-2 ps-3">
-													Tipo de Recorte
-												</div>
-												<div className="hover:bg-light-grey rounded-lg py-2 ps-3">
-													Modelo
+													Tipo de Produto
 												</div>
 											</div>
 										)}
@@ -307,7 +215,6 @@ export default function DashboardPecasPage({ params }) {
 							<table className="min-w-full text-[12px] md:text-sm table-fixed select-none">
 								<thead className="bg-light-grey">
 									<tr>
-										<th className="sticky inset-y-0 start-0 px-4 py-2"></th>
 										<th
 											onClick={() =>
 												handleSorting("titulo")
@@ -318,26 +225,7 @@ export default function DashboardPecasPage({ params }) {
 											{sortByTitulo.ascending ? "⏶" : "⏷"}
 										</th>
 										<th className="text-left px-4 py-2 font-light text-disabled">
-											SKU
-										</th>
-										<th className="text-left px-4 py-2 font-light text-disabled">
-											Modelo
-										</th>
-										<th
-											onClick={() =>
-												handleSorting("ordem")
-											}
-											className="text-left px-4 py-2 font-light text-disabled hover:bg-grey cursor-pointer active:text-dark-purple hidden lg:table-cell"
-										>
-											Ordem{" "}
-											<span className="text-lg">
-												{sortByOrdem.ascending
-													? "⏶"
-													: "⏷"}
-											</span>
-										</th>
-										<th className="text-left px-4 py-2 font-light text-disabled hidden lg:table-cell">
-											Status
+											Descricao
 										</th>
 										<th className="text-start px-4 py-2 font-light text-disabled">
 											Ações
@@ -346,78 +234,16 @@ export default function DashboardPecasPage({ params }) {
 								</thead>
 
 								<tbody className="divide-y divide divide-grey">
-									{filteredRecortes.map((recorte, index) => (
+									{filteredProdutos.map((produto, index) => (
 										<tr
 											key={index}
 											className="text-[10px] md:text-sm font-medium py-2 hover:cursor-pointer hover:bg-light-grey"
-											onClick={() =>
-												handleRecorteSelection(recorte)
-											}
 										>
-											<td className="flex items-center align-middle justify-center w-full h-full">
-												<div className="inline-flex items-center p-2">
-													<label className="flex items-center cursor-pointer relative">
-														<input
-															onChange={(e) => {
-																e.stopPropagation();
-																handleRecorteSelection(
-																	recorte,
-																);
-															}}
-															onClick={() =>
-																handleRecorteSelection(
-																	recorte,
-																)
-															}
-															type="checkbox"
-															checked={recortesSelecionados.includes(
-																recorte.id,
-															)}
-															className="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded-full bg-light-grey shadow hover:shadow-md border border-grey checked:bg-dark-purple checked:border-dark-purple"
-															id="check-custom-style"
-														/>
-														<span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																className="h-3.5 w-3.5"
-																viewBox="0 0 20 20"
-																fill="currentColor"
-																stroke="currentColor"
-																strokeWidth="1"
-															>
-																<path
-																	fillRule="evenodd"
-																	d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-																	clipRule="evenodd"
-																></path>
-															</svg>
-														</span>
-													</label>
-												</div>
-											</td>
 											<td className="px-4 py-3 text-[8px] sm:text-[10px] md:text-xs break-all">
-												{recorte.nome}
+												{produto.nome}
 											</td>
 											<td className="px-4 py-3">
-												#{recorte.SKU}
-											</td>
-											<td className="px-4 py-3">
-												{recorte.tipoProduto.value}
-											</td>
-											<td className="px-4 py-3 hidden lg:table-cell">
-												{recorte.ordemExibicao.value}
-											</td>
-											<td className="px-4 py-3 hidden lg:table-cell">
-												{recorte.ativo && (
-													<span className="bg-green p-1 rounded-lg text-xs text-dark-green">
-														Ativo
-													</span>
-												)}
-												{!recorte.ativo && (
-													<span className="bg-red p-1 rounded-lg text-xs font-thin text-light">
-														Expirado
-													</span>
-												)}
+												{produto.descricao}
 											</td>
 											<td>
 												<span className="inline-flex overflow-hidden justify-center align-middle items-center shadow-sm">
@@ -448,7 +274,7 @@ export default function DashboardPecasPage({ params }) {
 														onClick={(e) => {
 															e.stopPropagation();
 															handleDelete(
-																recorte.id,
+																produto.id,
 															);
 														}}
 														className="inline-block p-2 text-disabled hover:text-red focus:relative"

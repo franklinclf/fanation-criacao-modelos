@@ -36,7 +36,7 @@ export default function Sidebar() {
 	return (
 		<>
 			<div
-				className={`fixed shadow-[0px_2px_6px_2px_rgba(0,0,0,0.15),0px_1px_4px_0px_rgba(0,0,0,0.15)] inset-y-0 left-0 z-40 flex w-64 transform flex-col items-center justify-start gap-2 bg-light-grey px-[18] pb-3 pt-4 transition-transform sm:h-[calc(100vh-4rem)] sm:justify-start ${isOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
+				className={`fixed shadow-[0px_2px_6px_2px_rgba(0,0,0,0.15),0px_1px_4px_0px_rgba(0,0,0,0.15)] inset-y-0 left-0 z-40 flex w-64 transform flex-col-reverse sm:flex-col items-center justify-start gap-2 bg-light-grey px-[18] pb-3 pt-4 transition-transform sm:h-[calc(100vh-4rem)] ${isOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
 				style={{ top: "4rem" }}
 			>
 				{menuItems.map((item, index) => {

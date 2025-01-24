@@ -3,8 +3,8 @@ import { generateToken, verifyToken } from "../utils/jwt";
 import { comparePassword } from "../utils/bcrypt";
 import { findUserByUsername } from "./users";
 import { serialize } from "cookie";
-import cookie from "cookie";
 import { getRecortesByUser, getRecorteSpecs } from "./recortes";
+import { getProdutosByUser } from "./produtos";
 
 export async function login(username, password, res) {
 	if (!username || !password) {
@@ -75,13 +75,15 @@ export async function verify(req, res) {
 			.json({ success: false, message: "Não autenticado." });
 	}
 
-	const user = await findUserByUsername(username);
+	const user = await findUserByUsername(username, res);
 
 	const specs = await getRecorteSpecs();
 
-	const recortes = await getRecortesByUser(username);
+	const recortes = await getRecortesByUser(username, res);
+
+	const produtos = await getProdutosByUser(username, res);
 	
 	return res
 		.status(200)
-		.json({ success: true, user: { username: user.username }, specs, recortes });
+		.json({ success: true, user: { username: user.username }, specs, recortes, produtos });
 }

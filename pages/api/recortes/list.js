@@ -12,7 +12,14 @@ export default async function handler(req, res) {
             ids = [parseInt(ids, 10)];
         }
 
-        return getRecortesByList(user, ids, res);
+        const recortes = await getRecortesByList(user, ids, res);
+        if(recortes) {
+            return res.status(200).json({success:true, recortes});
+        }
+        else {
+            return res.status(404).json({success: false, message: "Recortes não encontrados." });
+        }
+
     } else {
         res.status(405).json({ message: "Método não permitido." });
     }

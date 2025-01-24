@@ -12,7 +12,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import OverlappedImages from "@/app/components/OverlappedImages";
 import { redirect } from "next/navigation";
 
-export default function DashboardHomePage({ params }) {
+export default function DashboardPreviewPage({ params }) {
 	const { ids } = use(params);
 	const idsIntArray = ids.map((id) => parseInt(id, 10));
 	const { user } = useAuth();
@@ -69,16 +69,17 @@ export default function DashboardHomePage({ params }) {
 	};
 
 	const onSubmitForm = async () => {
-		console.log(getValues());
-		
+		console.log({ produto: getValues(), user });
+
 		await axios
-			.post("/api/produtos/novo", { ...getValues(), user: user.username })
+			.post("/api/produtos/novo", { produto: getValues(), user })
 			.catch((error) => {
 				console.error(error);
 			})
 			.then((response) => {
-				if (response.success) {
-					redirect("/dashboard/visualizacao");
+				let data = response.data;
+				if (data.success) {
+					redirect(`/dashboard/visualizacao/`);
 				}
 			});
 	};
@@ -93,15 +94,19 @@ export default function DashboardHomePage({ params }) {
 					},
 				})
 				.then((response) => {
-					setRecortes(response.data);
 					setFocus("nome");
-					const images = response.data.map((recorte) => ({
-						url: recorte.urlImagem,
-						ordem: recorte.ordemExibicao.value,
-						id: recorte.id,
-					}));
-					setImages(images);
-					register("recortes");
+					let data = response.data;
+					if (data.success) {
+						const images = data.recortes.map((recorte) => ({
+							id: recorte.id,
+							url: recorte.urlImagem,
+							ordem: recorte.ordemExibicao.value,
+						}));
+
+						setRecortes(data.recortes);
+						setImages(images);
+						register("recortes");
+					}
 				})
 				.catch((error) => {
 					console.error("Error fetching recortes:", error);
@@ -134,20 +139,19 @@ export default function DashboardHomePage({ params }) {
 					</div>
 				</div>
 				<div className="flex w-full select-none flex-col items-center justify-end overflow-y-auto px-10 py-7 align-middle">
-					<div className="mb-5 flex w-full flex-col items-center justify-between gap-3 lg:flex-row">
+					<div className="flex w-full flex-col items-center justify-between gap-3 lg:flex-row">
 						<div className=" flex w-full flex-col items-start justify-between gap-3">
-							<div>
-								<p className="text-wrap text-2xl text-dark">
-									<input
-										className="border-none focus:border-none outline-none"
-										type="text"
-										placeholder={`Modelo ${recortes[0]?.tipoProduto?.value || ""}`}
-										{...register("nome")}
-									></input>
-									<span className="text-red opacity-50 text-xs">
-										{errors?.nome?.message}
-									</span>
-								</p>
+							<div className="w-5/6">
+								<div className="text-red opacity-50 text-xs">
+									{errors?.nome?.message}
+								</div>
+								<textarea
+									maxLength="50"
+									className="text-2xl w-full border-none focus:border-none outline-none resize-none overflow-hidden max-h-20 pt-3 ps-3 align-middle"
+									type="text"
+									placeholder={`Modelo ${recortes[0]?.tipoProduto?.value || ""}`}
+									{...register("nome")}
+								></textarea>
 							</div>
 						</div>
 					</div>
@@ -235,10 +239,12 @@ export default function DashboardHomePage({ params }) {
 								IMAGEM
 							</p>
 							<div className="flex w-full flex-col p-4">
-								<OverlappedImages
-									images={images}
-									selected={watch("recortes")}
-								/>
+								{images && (
+									<OverlappedImages
+										images={images}
+										selected={watch("recortes")}
+									/>
+								)}
 							</div>
 						</div>
 					</div>

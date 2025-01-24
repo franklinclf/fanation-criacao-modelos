@@ -108,6 +108,7 @@ export default function AuthProvider({ children }) {
 		login,
 		signup,
 		logout,
+		fetchData,
 		user,
 		userData,
 		isAuthenticated,

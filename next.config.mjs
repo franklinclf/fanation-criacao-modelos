@@ -12,6 +12,16 @@ const nextConfig = {
 				destination: "/dashboard/pecas/1",
 				permanent: true,
 			},
+			{
+				source: "/dashboard/visualizacao",
+				destination: "/dashboard/visualizacao/1",
+				permanent: true,
+			},
+			{
+				source: "/dashboard/visualizacao/0",
+				destination: "/dashboard/visualizacao/1",
+				permanent: true,
+			}
 		];
 	},
 	images: {

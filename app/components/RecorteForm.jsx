@@ -63,12 +63,12 @@ export default function RecorteForm({ defaultData }) {
 		});
 	}
 
-	async function createNewRecorte(recorteData) {
+	const createNewRecorte = async (recorteData) => {
 		await axios
 			.post("/api/recortes/novo", recorteData)
 			.then((response) => {
 				if (response.data.success) {
-					router.push("/dashboard/pecas");
+					router.push("/dashboard/recortes");
 				}
 			})
 			.catch((error) => {

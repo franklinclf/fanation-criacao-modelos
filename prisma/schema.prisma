@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = "mysql://root:IAmaChampion8151-@localhost:3306/fanation"
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PRODUCTION")
 }
 
 model Usuario {
@@ -20,7 +20,7 @@ model Usuario {
 model Recorte {
   id Int @id @default(autoincrement())
   SKU String @unique
-  chave String @unique
+  chave String
   usuarioId Int
   usuario Usuario @relation(fields: [usuarioId], references: [id])
   createdAt DateTime @default(now())
@@ -49,9 +49,8 @@ model Produto {
   nome String
   usuarioId Int
   usuario Usuario @relation(fields: [usuarioId], references: [id])
-  descricao String?
+  descricao String? @default("")
   recortes Recorte[]
-  urlImagem String
 
   @@map("produtos")
 }

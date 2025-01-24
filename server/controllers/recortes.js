@@ -1,5 +1,6 @@
 import { prisma } from "@/prisma/client";
 import { findUserByUsername } from "./users";
+import { deleteFile } from "@/firebase";
 
 export async function novoRecorte(recorteData, res) {
 	const usuario = await findUserByUsername(recorteData.user);
@@ -94,9 +95,7 @@ export async function getRecorteById(id, res) {
 }
 
 export async function getRecortesByList(username, ids, res) {
-	console.log(username, ids);
 	const usuario = await findUserByUsername(username, res);
-	console.log(usuario);
 	
 	const recortes = await prisma.Recorte.findMany({
 		where: {
@@ -113,7 +112,7 @@ export async function getRecortesByList(username, ids, res) {
 
 	const recortesArray = Object.keys(recortes).map((key) => recortes[key]);
 	
-	return res.status(200).json(recortesArray);
+	return recortesArray;
 }
 
 export async function deleteRecorte(id, res) {
@@ -130,6 +129,8 @@ export async function deleteRecorte(id, res) {
 	await prisma.Recorte.delete({
 		where: { id: recorte.id },
 	});
+
+	const deletedFile = await deleteFile(recorte.urlImagem);
 
 	return res.status(200).json({ success: true });
 }

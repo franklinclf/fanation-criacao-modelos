@@ -7,7 +7,7 @@ export default function AdicionarRecortePage() {
 		id: null,
 		user: null,
 		nome: "",
-		ativo: false,
+		ativo: true,
 		tipoProduto: "",
 		tipoRecorte: "",
 		posicaoRecorte: "",

@@ -2,9 +2,9 @@ import { novoProduto } from "@/server/controllers/produtos";
 
 export default async function handler(req, res) {
     if (req.method === "POST") {
-        const produtoData = req.body;
+        const {produto, user} = req.body;
 
-        return novoProduto(produtoData, res)
+        return novoProduto(produto, user, res)
     } else {
         res.status(405).json({ message: "Método não permitido." });
     }
