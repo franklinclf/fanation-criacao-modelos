@@ -7,22 +7,15 @@ import { set, useForm } from "react-hook-form";
 import { useAuth } from "@/app/context/AuthContext";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { storage, uploadFile } from "@/firebase";
-import {
-	getDownloadURL,
-	ref as storageRef,
-	uploadBytes,
-} from "firebase/storage";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { uploadFile } from "@/firebase";
 import axios from "axios";
 
 export default function RecorteForm({ defaultData }) {
-	
 	const { userData, user } = useAuth();
-	console.log(userData);
-	
 	const router = useRouter();
 	const [imagemState, setImagemState] = useState(null);
+	const [draggingOver, setDraggingOver] = useState(false);
 
 	const schema = yup.object().shape({
 		nome: yup.string().required("obrigatório").max(50),
@@ -32,8 +25,17 @@ export default function RecorteForm({ defaultData }) {
 		ordemExibicao: yup.string().required("obrigatório"),
 		tecido: yup.string().required("obrigatório"),
 		cor: yup.string().required("obrigatório"),
-		SKU: yup.string().required("obrigatório").test("SKU", "SKU já existe", async (value) => {return await axios.get(`/api/recortes/existsBySKU?SKU=${value}`).then((response) => {return !response.data})}),
-		imagem: yup.mixed().required("obrigatório")
+		SKU: yup
+			.string()
+			.required("obrigatório")
+			.test("SKU", "SKU já existe", async (value) => {
+				return await axios
+					.get(`/api/recortes/existsBySKU?SKU=${value}`)
+					.then((response) => {
+						return !response.data;
+					});
+			}),
+		imagem: yup.mixed().required("obrigatório"),
 	});
 
 	const {
@@ -52,22 +54,26 @@ export default function RecorteForm({ defaultData }) {
 	async function onSubmitForm() {
 		const imagem = getValues("imagem");
 		await uploadFile(imagem, getValues("chave")).then((url) => {
-			setValue("urlImagem", `https://storage.googleapis.com/fanationapp.firebasestorage.app/assets/${imagem.nome}.${imagem.name.substring(imagem.name.lastIndexOf('.')+1, imagem.name.length)}`);
+			setValue(
+				"urlImagem",
+				url,
+			);
 			setValue("user", user.username);
-			console.log(getValues());
 			createNewRecorte(getValues());
 		});
 	}
 
 	async function createNewRecorte(recorteData) {
-		await axios.post("/api/recortes/novo", recorteData).then((response) => {
-			if (response.data.success) {
-				router.redirect;
-			}
-		})
-		.catch((error) => {
-			console.log(error);
-		});
+		await axios
+			.post("/api/recortes/novo", recorteData)
+			.then((response) => {
+				if (response.data.success) {
+					router.push("/dashboard/pecas");
+				}
+			})
+			.catch((error) => {
+				console.log(error);
+			});
 	}
 
 	const handleImageChange = (e) => {
@@ -81,18 +87,22 @@ export default function RecorteForm({ defaultData }) {
 		}
 	};
 
+	const handleDrop = (e) => {
+		e.preventDefault();
+		const droppedFiles = e.dataTransfer.files;
+		if (droppedFiles) {
+			const newFile = droppedFiles[0];
+			setImagemState(newFile);
+			setValue("imagem", newFile, { shouldDirty: true });
+			setDraggingOver(false);
+		}
+	};
+
 	useEffect(() => {
-		const chave = (
-			getValues("tipoProduto") +
-			"_" +
-			getValues("tipoRecorte") +
-			"_" +
-			getValues("tecido") +
-			"_" +
-			getValues("cor")
-		)
-			.toLocaleLowerCase()
-			.replace(" ", "-");
+		const chave =
+			`${watch("tipoProduto")}_${watch("tipoRecorte")}_${watch("tecido")}_${watch("cor")}`
+				.toLocaleLowerCase()
+				.replace(" ", "-");
 		setValue("chave", chave, { shouldDirty: false });
 	}, [
 		watch("tipoProduto"),
@@ -102,7 +112,7 @@ export default function RecorteForm({ defaultData }) {
 	]);
 
 	return (
-		<form onSubmit={handleSubmit(onSubmitForm)}>
+		<form onSubmit={handleSubmit(onSubmitForm)} onDrop={(e) => handleDrop(e)} onDragOver={(e) => {e.preventDefault(); setDraggingOver(true);}} onDragLeave={(e) => {e.preventDefault(); setDraggingOver(false)}}>
 			<div
 				className={`${isDirty ? "translate-y-0" : "-translate-y-full"} flex items-center justify-between bg-light-grey py-5 pe-28 ps-20 text-sm shadow-[0px_2px_6px_2px_rgba(0,0,0,0.15),0px_1px_4px_0px_rgba(0,0,0,0.15)] transition-transform duration-300`}
 			>
@@ -198,11 +208,13 @@ export default function RecorteForm({ defaultData }) {
 									<option disabled value="">
 										Selecione um modelo
 									</option>
-									{userData?.specs.tiposProduto.map((tipo) => (
-										<option key={tipo} value={tipo}>
-											{tipo}
-										</option>
-									))}
+									{userData?.specs.tiposProduto.map(
+										(tipo) => (
+											<option key={tipo} value={tipo}>
+												{tipo}
+											</option>
+										),
+									)}
 								</select>
 							</div>
 							<div className="w-full xl:w-1/2">
@@ -219,11 +231,13 @@ export default function RecorteForm({ defaultData }) {
 									<option disabled value="">
 										Selecione um tipo
 									</option>
-									{userData?.specs.tiposRecorte.map((tipo) => (
-										<option key={tipo} value={tipo}>
-											{tipo}
-										</option>
-									))}
+									{userData?.specs.tiposRecorte.map(
+										(tipo) => (
+											<option key={tipo} value={tipo}>
+												{tipo}
+											</option>
+										),
+									)}
 								</select>
 							</div>
 						</div>
@@ -391,7 +405,7 @@ export default function RecorteForm({ defaultData }) {
 						<div className="group flex w-full items-center justify-center lg:w-72">
 							<label
 								htmlFor="dropzone-file"
-								className="bg-gray-50 group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-grey px-10 text-center hover:bg-light-grey group-hover:border-dark-grey"
+								className={`${draggingOver ? 'bg-grey border-dark-grey ' : '' }bg-gray-50 group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-grey px-10 text-center hover:bg-light-grey group-hover:border-dark-grey`}
 							>
 								<div className="group flex flex-col items-center justify-center pb-6 pt-5 group-hover:text-dark-grey">
 									<Image
@@ -425,5 +439,5 @@ export default function RecorteForm({ defaultData }) {
 				</div>
 			</div>
 		</form>
-	)
+	);
 }

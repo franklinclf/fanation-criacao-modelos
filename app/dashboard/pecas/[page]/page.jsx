@@ -6,6 +6,8 @@ import { TiPlus } from "react-icons/ti";
 import axios from "axios";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, redirect } from "next/navigation";
+import { set } from "react-hook-form";
+import { FaSortDown, FaSortUp } from "react-icons/fa";
 
 export default function DashboardPecasPage({ params }) {
 	const [filtroAtivo, setFiltroAtivo] = useState("Todos");
@@ -13,22 +15,81 @@ export default function DashboardPecasPage({ params }) {
 	const [numAtivos, setNumAtivos] = useState(0);
 	const [numExpirado, setNumExpirado] = useState(0);
 	const [pesquisaTextual, setPesquisaTextual] = useState("");
+	const [recortesSelecionados, setRecortesSelecionados] = useState([]);
 	const { user, userData } = useAuth();
 	const { page } = use(params);
 	const [filteredRecortes, setFilteredRecortes] = useState([]);
 	const [totalPages, setTotalPages] = useState(0);
 	const router = useRouter();
+	const [sortByTitulo, setSortByTitulo] = useState({sort: true, ascending: true});
+	const [sortByOrdem, setSortByOrdem] = useState({sort: false, ascending: true});
+	const [errorMessage, setErrorMessage] = useState("");
+
+	function handleGenerateImage() {
+		const ids = recortesSelecionados.join("/");
+		router.push(`/dashboard/visualizacao/preview/${ids}`);
+	}
+
+	function handleSorting(type) {
+		if(type === "titulo") {
+			setSortByTitulo({sort: true, ascending: !sortByTitulo.ascending});
+			setSortByOrdem({sort: false, ascending: true});
+		}
+		else if(type === "ordem") {
+			setSortByOrdem({sort: true, ascending: !sortByOrdem.ascending});
+			setSortByTitulo({sort: false, ascending: true});
+		}
+	}
+
+	function handleRecorteSelection(recorte) {
+		setErrorMessage("");
+
+		if(recortesSelecionados.includes(recorte.id)) {
+			setRecortesSelecionados(recortesSelecionados.filter((id) => id !== recorte.id));
+		}
+		else {
+			if(recortesSelecionados.length === 4) {
+				setErrorMessage("Selecione no máximo 4 recortes.");
+				return;
+			}
+			setRecortesSelecionados([...recortesSelecionados, recorte.id]);
+		}
+	}
+
+	async function handleDelete(recorte) {
+		if (!confirm("Tem certeza que deseja excluir este recorte?")) {
+			return;
+		}
+
+		await axios
+			.delete(`/api/recortes/${recorte}`)
+			.then((response) => {
+				let data = response.data;
+				if (data.success) {
+					router.refresh();
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
 
 	useMemo(() => {
 		if (userData && userData.recortes) {
-			setNumTodos(userData.recortes.length);
-			setTotalPages(Math.ceil(userData.recortes.length / 10));
+			const totalRecortes = userData.recortes.length;
+			setNumTodos(totalRecortes);
+			totalRecortes == 0
+				? setTotalPages(1)
+				: setTotalPages(Math.ceil(totalRecortes / 10));
+
 			const ativos = userData.recortes.filter(
 				(recorte) => recorte.ativo === true,
 			).length;
+
 			const expirados = userData.recortes.filter(
 				(recorte) => recorte.ativo === false,
 			).length;
+
 			setNumAtivos(ativos);
 			setNumExpirado(expirados);
 		}
@@ -36,6 +97,10 @@ export default function DashboardPecasPage({ params }) {
 
 	useEffect(() => {
 		if (userData && userData.recortes) {
+			if (!parseInt(page)) redirect("/dashboard/pecas/1");
+			if (page < 0) redirect("/dashboard/pecas/1");
+			if (page > totalPages) redirect(`/dashboard/pecas/${totalPages}`);
+
 			let recortes = [...userData.recortes];
 
 			if (filtroAtivo !== "Todos") {
@@ -51,11 +116,40 @@ export default function DashboardPecasPage({ params }) {
 			}
 
 			if (pesquisaTextual) {
-				recortes = recortes.filter((recorte) =>
-					recorte.nome
-						.toLowerCase()
-						.includes(pesquisaTextual.toLowerCase()),
+				recortes = recortes.filter(
+					(recorte) =>
+						recorte.nome
+							.toLowerCase()
+							.includes(pesquisaTextual.toLowerCase()) ||
+						recorte.SKU.toLowerCase().includes(
+							pesquisaTextual.toLowerCase(),
+						) ||
+						recorte.tipo.value
+							.toLowerCase()
+							.includes(pesquisaTextual.toLowerCase()),
 				);
+			}
+
+			if(sortByTitulo.sort) {
+				recortes = recortes.sort((a, b) => {
+					if(sortByTitulo.ascending) {
+						return a.nome.localeCompare(b.nome);
+					}
+					else {
+						return b.nome.localeCompare(a.nome);
+					}
+				});
+			}
+
+			if(sortByOrdem.sort) {
+				recortes = recortes.sort((a, b) => {
+					if(sortByOrdem.ascending) {
+						return a.ordemExibicao.value - b.ordemExibicao.value;
+					}
+					else {
+						return b.ordemExibicao.value - a.ordemExibicao.value;
+					}
+				});
 			}
 
 			if (page) {
@@ -69,48 +163,28 @@ export default function DashboardPecasPage({ params }) {
 		filtroAtivo,
 		pesquisaTextual,
 		page,
-		numTodos,
-		numAtivos,
-		numExpirado,
+		sortByTitulo,
+		sortByOrdem
 	]);
-
-	async function handleDelete(recorte) {
-		if(!confirm("Tem certeza que deseja excluir este recorte?")) {
-			return;
-		}
-
-		await axios.delete(`/api/recortes/${recorte}`)
-		.then((response) => {
-			let data = response.data;
-			if(data.success) {
-				redirect("/dashboard/pecas/1");
-			}
-		})
-		.catch((error) => {
-			console.error(error);
-		})
-	}
 
 	return (
 		<DashboardPage>
 			<div className="flex w-full flex-col items-center justify-end overflow-y-auto px-10 py-7 align-middle">
 				<div className="mb-5 flex w-full items-center gap-3 flex-row justify-between">
-					<p className="text-2xl text-dark">Peças gerais</p>
+					<p className="text-2xl text-dark">Peças gerais <span className="text-red text-sm">{errorMessage.length > 0 && (errorMessage)}</span></p>
 					<button
-						onClick={() =>
-							router.push("/dashboard/pecas/adicionar")
-						}
+						onClick={() => redirect("/dashboard/pecas/adicionar")}
 						className="rounded-lg bg-dark px-4 py-3 text-sm text-white hover:opacity-85"
 					>
 						<span className="hidden md:inline-block">
-							Adicionar Peça
+							Adicionar Peça 
 						</span>
 						<span className="inline-block md:hidden">
 							<TiPlus />
 						</span>
 					</button>
 				</div>
-				<div className="w-full rounded-[20] border border-grey">
+				<div className="w-full rounded-[20] border border-grey pb-5">
 					<div className="flex m-5 mb-10 flex-col md:flex-row gap-3 items-center justify-between">
 						<div className="flex items-center gap-3">
 							<button
@@ -132,6 +206,11 @@ export default function DashboardPecasPage({ params }) {
 								Expirado ({numExpirado})
 							</button>
 						</div>
+						
+						<div className="flex items-center gap-5">
+							{recortesSelecionados.length > 0 && (
+								<button onClick={() => handleGenerateImage()} className="rounded-lg px-4 py-3 text-sm text-dark border-dark hover:bg-dark hover:text-white hover:opacity-85">Gerar Imagem</button>
+							)}
 						<div className="flex items-center gap-5">
 							<div className="relative">
 								<input
@@ -173,15 +252,20 @@ export default function DashboardPecasPage({ params }) {
 								alt=""
 							/>
 						</div>
+						</div>
 					</div>
 					<div className="w-full">
 						<div className="overflow-x-auto">
-							<table className="min-w-full text-sm">
+							<table className="min-w-full text-[12px] md:text-sm table-fixed select-none">
 								<thead className="bg-light-grey">
 									<tr>
 										<th className="sticky inset-y-0 start-0 px-4 py-2"></th>
-										<th className="text-left px-4 py-2 font-light text-disabled">
+										<th
+											onClick={() => handleSorting("titulo")}
+											className="text-left px-4 py-2 font-light text-disabled w-2/5 hover:bg-grey cursor-pointer active:text-dark-purple"
+										>
 											Título
+											{sortByTitulo.ascending ? '⏶' : '⏷'}
 										</th>
 										<th className="text-left px-4 py-2 font-light text-disabled">
 											SKU
@@ -189,10 +273,13 @@ export default function DashboardPecasPage({ params }) {
 										<th className="text-left px-4 py-2 font-light text-disabled">
 											Tipo
 										</th>
-										<th className="text-left px-4 py-2 font-light text-disabled">
-											Ordem de Exibição
+										<th
+											onClick={() => handleSorting("ordem")}
+											className="text-left px-4 py-2 font-light text-disabled hover:bg-grey cursor-pointer active:text-dark-purple"
+										>
+											Ordem <span className="text-lg">{sortByOrdem.ascending ? '⏶' : '⏷'}</span>
 										</th>
-										<th className="text-left px-4 py-2 font-light text-disabled">
+										<th className="text-left px-4 py-2 font-light text-disabled hidden lg:table-cell">
 											Status
 										</th>
 										<th className="text-start px-4 py-2 font-light text-disabled">
@@ -205,14 +292,20 @@ export default function DashboardPecasPage({ params }) {
 									{filteredRecortes.map((recorte, index) => (
 										<tr
 											key={index}
-											className="text-xs md:text-sm font-medium py-2"
+											className="text-[10px] md:text-sm font-medium py-2"
 										>
 											<td className="flex items-center align-middle justify-center w-full h-full">
 												<div className="inline-flex items-center p-2">
 													<label className="flex items-center cursor-pointer relative">
 														<input
-															defaultChecked
+															onChange={(e) => {
+																handleRecorteSelection(
+																	recorte,
+																	e,
+																);
+															}}
 															type="checkbox"
+															checked={recortesSelecionados.includes(recorte.id)}
 															className="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded-full bg-light-grey shadow hover:shadow-md border border-grey checked:bg-dark-purple checked:border-dark-purple"
 															id="check-custom-style"
 														/>
@@ -235,7 +328,7 @@ export default function DashboardPecasPage({ params }) {
 													</label>
 												</div>
 											</td>
-											<td className="px-4 py-2">
+											<td className="px-4 py-2 text-ell">
 												{recorte.nome}
 											</td>
 											<td className="px-4 py-2">
@@ -244,10 +337,10 @@ export default function DashboardPecasPage({ params }) {
 											<td className="px-4 py-2">
 												{recorte.tipo.value}
 											</td>
-											<td className="px-4 py-2">
+											<td className="px-4 py-2 hidden lg:table-cell">
 												{recorte.ordemExibicao.value}
 											</td>
-											<td className="px-4 py-2">
+											<td className="px-4 py-2 hidden lg:table-cell">
 												{recorte.ativo && (
 													<span className="bg-green p-1 rounded-lg text-xs text-dark-green">
 														Ativo
@@ -281,7 +374,12 @@ export default function DashboardPecasPage({ params }) {
 														</svg>
 													</button>
 
-													<button onClick={() => handleDelete(recorte.id)}
+													<button
+														onClick={() =>
+															handleDelete(
+																recorte.id,
+															)
+														}
 														className="inline-block p-2 text-disabled hover:text-red focus:relative"
 														title="Excluir Recorte"
 													>
@@ -330,8 +428,16 @@ export default function DashboardPecasPage({ params }) {
 					</a>
 				</li>
 				{[...Array(totalPages)].map((_, index) => (
-					<li key={index} onClick={() => {page != index + 1 && router.push(`/dashboard/pecas/${index + 1}`)}}>
-						<a className={`${page == index + 1 ? "bg-dark text-white" : "" } inline-flex cursor-pointer hover:bg-dark hover:text-white size-8 items-center justify-center rounded border border-grey text-disabled`}>
+					<li
+						key={index}
+						onClick={() => {
+							page != index + 1 &&
+								router.push(`/dashboard/pecas/${index + 1}`);
+						}}
+					>
+						<a
+							className={`${page == index + 1 ? "bg-dark text-white" : ""} inline-flex cursor-pointer hover:bg-dark hover:text-white size-8 items-center justify-center rounded border border-grey text-disabled`}
+						>
 							{index + 1}
 						</a>
 					</li>

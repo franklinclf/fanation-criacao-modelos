@@ -51,7 +51,7 @@ export async function getRecortesByUser(username, res) {
 	const usuario = await findUserByUsername(username, res)
 	
 
-	const recortes = await prisma.recorte.findMany({
+	const recortes = await prisma.Recorte.findMany({
 		where: {
 			usuarioId: usuario.id
 		},
@@ -62,10 +62,58 @@ export async function getRecortesByUser(username, res) {
 			material: true,
 			cor: true,
 			posicao: true 
+		},
+		orderBy: {
+			nome: 'asc'
 		}
 	});
 
 	return recortes;
+}
+
+export async function getRecorteById(id, res) {
+	const recorte = await prisma.Recorte.findUnique({
+		where: { id: id },
+		include: {
+			tipoProduto: true,
+			tipo: true,
+			ordemExibicao: true,
+			material: true,
+			cor: true,
+			posicao: true 
+		}
+	});
+
+	if (!recorte) {
+		return res
+			.status(404)
+			.json({ success: false, message: "Recorte não encontrado." });
+	}
+
+	return res.status(200).json(recorte);
+}
+
+export async function getRecortesByList(username, ids, res) {
+	console.log(username, ids);
+	const usuario = await findUserByUsername(username, res);
+	console.log(usuario);
+	
+	const recortes = await prisma.Recorte.findMany({
+		where: {
+			usuarioId: usuario.id,
+			id: {
+				in: ids,
+			},
+		},
+		include: {
+			ordemExibicao: true,
+			tipoProduto: true,
+		}
+	});
+
+	const recortesArray = Object.keys(recortes).map((key) => recortes[key]);
+	
+	return res.status(200).json(recortesArray);
 }
 
 export async function deleteRecorte(id, res) {

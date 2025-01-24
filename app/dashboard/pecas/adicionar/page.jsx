@@ -15,11 +15,10 @@ export default function AdicionarRecortePage() {
 		tecido: "",
 		cor: "",
 		SKU: "",
-		chave: "_____",
+		chave: "___",
 		urlImagem: "",
 		imagem: null
 	};
-
 	return (
 		<DashboardPage>
 			<RecorteForm defaultData={defaultData}/>
